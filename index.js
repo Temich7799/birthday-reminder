@@ -14,14 +14,14 @@ const db = mysql.createConnection({
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'yourEmail@gmail.com',
-        pass: 'yourEmailPassword'
+        user: process.env.MAIL_USER + '@' + process.env.MAIL_DOMAIN,
+        pass: process.env.MAIL_PASSWORD
     }
 });
 
 const sendBirthdayReminder = (email, name, friendName, friendBirthday) => {
     const mailOptions = {
-        from: 'yourEmail@gmail.com',
+        from: process.env.MAIL_USER + '@' + process.env.MAIL_DOMAIN,
         to: email,
         subject: 'Upcoming Friend\'s Birthday Reminder',
         text: `Dear ${name},\n\nThis is a friendly reminder that your friend ${friendName}'s birthday is on ${friendBirthday}.\n\nBest regards,\nYour Reminder App`
