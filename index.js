@@ -1,6 +1,7 @@
 const mysql = require('mysql2');
 const nodemailer = require('nodemailer');
 const moment = require('moment');
+const fs = require('fs');
 const cron = require('node-cron');
 
 const db = mysql.createConnection({
@@ -10,6 +11,8 @@ const db = mysql.createConnection({
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
 });
+
+const dkimPrivateKey = (process.env.DKIM_PRIVATE_KEY_PATH && fs.readFileSync(process.env.DKIM_PRIVATE_KEY_PATH, 'utf8')) || process.env.DKIM_PRIVATE_KEY;
 
 const transporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST,
@@ -21,6 +24,11 @@ const transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false
+    },
+    dkim: {
+        domainName: '366dates.com',
+        keySelector: 'dkim',
+        privateKey: dkimPrivateKey
     }
 });
 
@@ -57,7 +65,6 @@ const checkFriendsBirthdays = () => {
                 [user.id, month, day],
                 (error, friends) => {
                     if (error) throw error;
-
                     friends.forEach(friend => {
                         const friendBirthday = `${friend.month}/${friend.day}`;
                         sendBirthdayReminder(user.email, user.name, friend.name, friendBirthday);
