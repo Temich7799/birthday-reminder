@@ -12,19 +12,24 @@ const db = mysql.createConnection({
 });
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    secure: process.env.MAIL_SECURE === 'true',
     auth: {
-        user: process.env.MAIL_USER + '@' + process.env.MAIL_DOMAIN,
+        user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASSWORD
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
 const sendBirthdayReminder = (email, name, friendName, friendBirthday) => {
     const mailOptions = {
-        from: process.env.MAIL_USER + '@' + process.env.MAIL_DOMAIN,
+        from: `${process.env.MAIL_USER}`,
         to: email,
         subject: 'Upcoming Friend\'s Birthday Reminder',
-        text: `Dear ${name},\n\nThis is a friendly reminder that your friend ${friendName}'s birthday is on ${friendBirthday}.\n\nBest regards,\nYour Reminder App`
+        text: `Dear ${name},\n\nThis is a friendly reminder that your friend ${friendName}'s birthday is on ${friendBirthday}.\n\nBest regards,\n366dates.com`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -37,9 +42,10 @@ const sendBirthdayReminder = (email, name, friendName, friendBirthday) => {
 
 const checkFriendsBirthdays = () => {
     const today = moment();
-    const reminderDate = today.add(20, 'days');
+    const daysTo = 20;
+    const reminderDate = today.add(daysTo - 1, 'days');
 
-    const month = reminderDate.month() + 1; // Months are 0-based in moment.js
+    const month = reminderDate.month() + 1;
     const day = reminderDate.date();
 
     db.query('SELECT id, email, name FROM users', (error, users) => {
