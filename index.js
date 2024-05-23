@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
         rejectUnauthorized: false
     },
     dkim: {
-        domainName: '366dates.com',
+        domainName: process.env.DOMAIN_NAME,
         keySelector: 'dkim',
         privateKey: dkimPrivateKey
     }
